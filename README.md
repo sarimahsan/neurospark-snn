@@ -9,16 +9,13 @@ An interactive, zero-dependency browser-based **Spiking Neural Network (SNN)** s
 
 ---
 
-## 🎬 Video Demonstration
-
-https://github.com/sarimahsan/neurospark-snn/raw/main/assets/demo.mp4
-
-<video src="https://github.com/sarimahsan/neurospark-snn/raw/main/assets/demo.mp4" width="100%" controls loop muted playsinline></video>
+## 🎬 Interactive Demonstration
 
 <div align="center">
-  <p><em>Interactive Walkthrough: SNN Classification Lab, Pattern Drawing Studio, Biological Playground & SNN vs ANN Benchmark</em></p>
+  <img src="assets/demo.gif" width="100%" alt="NeuroSpark SNN Simulator Live Walkthrough Demo">
+  <p><em>Live Walkthrough: SNN Classification Lab, Pattern Drawing Studio, Biological Dynamics & SNN vs ANN Benchmark</em></p>
   <a href="https://github.com/sarimahsan/neurospark-snn/raw/main/assets/demo.mp4">
-    <img src="https://img.shields.io/badge/▶_Direct_Video_Link-demo.mp4-00f2fe?style=for-the-badge" alt="Direct Video Link">
+    <img src="https://img.shields.io/badge/▶_Download_High--Res_MP4-assets%2Fdemo.mp4-00f2fe?style=for-the-badge" alt="Download High-Res MP4">
   </a>
 </div>
 
@@ -121,8 +118,9 @@ neurosimulator/
 ├── start.bat                # Windows one-click local server launcher
 ├── .gitignore               # Standard Git ignore rules
 │
-├── assets/                  # Media and video assets
-│   └── demo.mp4             # Full walkthrough video demonstration
+├── assets/                  # Media and demo assets
+│   ├── demo.gif             # Animated walkthrough demo (loops natively on GitHub)
+│   └── demo.mp4             # High-resolution MP4 video demonstration
 │
 ├── js/
 │   ├── snn.js               # Leaky Integrate-and-Fire layers, Surrogate Gradient BPTT, Adam
