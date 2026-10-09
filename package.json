@@ -1,0 +1,22 @@
+{
+  "name": "neurospark",
+  "version": "1.0.0",
+  "description": "Interactive Spiking Neural Network (SNN) simulator and biological neurodynamics studio",
+  "main": "index.html",
+  "scripts": {
+    "start": "node -e \"const http=require('http'),fs=require('fs'),path=require('path');http.createServer((req,res)=>{let p='.'+req.url.split('?')[0];if(p==='./')p='./index.html';let ext=path.extname(p);let m={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png'};fs.readFile(p,(e,d)=>{if(e){res.writeHead(404);res.end('Not Found')}else{res.writeHead(200,{'Content-Type':m[ext]||'text/plain','Cache-Control':'no-cache'});res.end(d)}})}).listen(8080,()=>console.log('⚡ NeuroSpark running at http://localhost:8080'))\""
+  },
+  "keywords": [
+    "spiking-neural-network",
+    "snn",
+    "neuromorphic-computing",
+    "izhikevich",
+    "lif-neuron",
+    "surrogate-gradient",
+    "bptt",
+    "neuroscience",
+    "machine-learning"
+  ],
+  "author": "",
+  "license": "MIT"
+}

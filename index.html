@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroSpark — Spiking Neural Network Simulator & Biological Neurodynamics</title>
+  <meta name="description" content="Interactive browser-based Spiking Neural Network (SNN) simulator featuring LIF neurons, surrogate gradient backpropagation, real-time spike rasters, oscilloscopes, and Izhikevich biological dynamics.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="brand-section">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <h1 class="brand-title">NEUROSPARK</h1>
+        <div class="brand-subtitle">Spiking Neural Network Simulator</div>
+      </div>
+    </div>
+
+    <!-- Mode Tabs -->
+    <nav class="nav-tabs" aria-label="Main Navigation">
+      <button class="tab-btn active" id="tabBtnLab" data-tab="lab">
+        <span>🔬</span> SNN Classification Lab
+      </button>
+      <button class="tab-btn" id="tabBtnDraw" data-tab="draw">
+        <span>✏️</span> Pattern Drawing Studio
+      </button>
+      <button class="tab-btn" id="tabBtnIzhi" data-tab="izhi">
+        <span>🧠</span> Izhikevich Biological Dynamics
+      </button>
+      <button class="tab-btn" id="tabBtnCompare" data-tab="compare" style="border-color: rgba(245, 158, 11, 0.4);">
+        <span>⚡ vs 🤖</span> SNN vs ANN Benchmark
+      </button>
+    </nav>
+
+    <!-- Real-time Telemetry Readout -->
+    <div class="telemetry-badges">
+      <div class="badge">
+        <span class="badge-label">Spike Rate</span>
+        <span class="badge-val" id="telemetrySpikeRate">0.0 Hz</span>
+      </div>
+      <div class="badge">
+        <span class="badge-label">Synaptic Ops</span>
+        <span class="badge-val" id="telemetrySOPs">0 SOPs</span>
+      </div>
+      <div class="badge">
+        <span class="badge-label">Engine Status</span>
+        <span class="badge-val" id="telemetryStatus" style="color: #10b981;">Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main>
+
+    <!-- ========================================== -->
+    <!-- TAB 1: SNN Classification Lab -->
+    <!-- ========================================== -->
+    <section class="tab-pane active" id="pane-lab">
+      <div class="lab-grid">
+        
+        <!-- Left Lab Controls -->
+        <aside class="card-panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><span>⚙️</span> Network & Task</h2>
+            <span class="panel-tag">LIF + BPTT</span>
+          </div>
+
+          <!-- Dataset Selection -->
+          <div class="control-group">
+            <div class="control-label-row">
+              <label class="control-label" for="datasetSelect">Task Dataset</label>
+            </div>
+            <select id="datasetSelect">
+              <option value="xor">Non-Linear XOR (4 Clusters)</option>
+              <option value="circles" selected>Concentric Circles</option>
+              <option value="moons">Two Interleaving Moons</option>
+              <option value="spirals">Two Spirals (Archimedean)</option>
+            </select>
+          </div>
+
+          <!-- Hyperparameters -->
+          <div class="control-group">
+            <div class="control-label-row">
+              <span class="control-label">Time Steps (T)</span>
+              <span class="control-val" id="valTimeSteps">16</span>
+            </div>
+            <input type="range" id="paramTimeSteps" min="8" max="32" step="4" value="16">
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span class="control-label">Membrane Decay (&beta;)</span>
+              <span class="control-val" id="valBeta">0.85</span>
+            </div>
+            <input type="range" id="paramBeta" min="0.5" max="0.98" step="0.01" value="0.85">
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span class="control-label">Threshold (Vth)</span>
+              <span class="control-val" id="valVThresh">1.0V</span>
+            </div>
+            <input type="range" id="paramVThresh" min="0.5" max="2.0" step="0.1" value="1.0">
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span class="control-label">Learning Rate</span>
+              <span class="control-val" id="valLR">0.015</span>
+            </div>
+            <input type="range" id="paramLR" min="0.002" max="0.05" step="0.002" value="0.015">
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span class="control-label">Hidden Neurons</span>
+              <span class="control-val" id="valHiddenSize">16</span>
+            </div>
+            <select id="paramHiddenSize">
+              <option value="8">8 Neurons</option>
+              <option value="16" selected>16 Neurons</option>
+              <option value="24">24 Neurons</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span class="control-label">Input Encoding</span>
+            </div>
+            <select id="paramEncoding">
+              <option value="rate" selected>Rate Frequency Pulses</option>
+              <option value="poisson">Poisson Spike Train</option>
+              <option value="constant">Direct Constant Current</option>
+            </select>
+          </div>
+
+          <!-- Training Action Buttons -->
+          <div class="btn-row">
+            <button class="btn btn-primary" id="btnTrainToggle">
+              <span id="trainIcon">▶</span> <span id="trainText">Train Network</span>
+            </button>
+            <button class="btn btn-secondary" id="btnTrainStep">Step 1x</button>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-danger" id="btnResetWeights">Reset Weights</button>
+            <button class="btn btn-secondary" id="btnResampleData">New Data</button>
+          </div>
+
+          <!-- Telemetry Metrics Card -->
+          <div class="metrics-grid">
+            <div class="metric-item">
+              <div class="metric-title">Epoch</div>
+              <div class="metric-val" id="metricEpoch">0</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-title">Loss (CE)</div>
+              <div class="metric-val" id="metricLoss">0.000</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-title">Accuracy</div>
+              <div class="metric-val" id="metricAcc" style="color: #10b981;">0.0%</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-title">Active Spikes</div>
+              <div class="metric-val" id="metricSpikes">0</div>
+            </div>
+          </div>
+
+          <div class="callout-info">
+            💡 <strong>Surrogate Gradient BPTT:</strong> Discontinuous Heaviside spike step functions are smoothed using a Fast-Sigmoid surrogate derivative: <br>
+            <code>&sigma;'(v) = 1 / (1 + &gamma;|v - Vth|)&sup2;</code> allowing gradient backpropagation through time.
+          </div>
+        </aside>
+
+        <!-- Right 4-Quadrant Visualizer Grid -->
+        <section class="dashboard-canvases">
+          
+          <!-- 1. Network Topology -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h3 class="panel-title"><span>🕸️</span> SNN Architecture & Synaptic Pulses</h3>
+              <span class="panel-tag">Interactive: Click Neuron</span>
+            </div>
+            <div class="canvas-wrapper">
+              <canvas id="canvasNetwork"></canvas>
+            </div>
+          </div>
+
+          <!-- 2. Decision Boundary -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h3 class="panel-title"><span>🎯</span> 2D Decision Boundary Heatmap</h3>
+              <span class="panel-tag" id="tagBoundarySamples">180 Samples</span>
+            </div>
+            <div class="canvas-wrapper">
+              <canvas id="canvasBoundary"></canvas>
+            </div>
+          </div>
+
+          <!-- 3. Spike Raster Plot -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h3 class="panel-title"><span>📊</span> Spike Raster Plot (Time vs Neurons)</h3>
+              <span class="panel-tag">Spike Ticks</span>
+            </div>
+            <div class="canvas-wrapper">
+              <canvas id="canvasRaster"></canvas>
+            </div>
+          </div>
+
+          <!-- 4. Membrane Potential Oscilloscope -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h3 class="panel-title"><span>📈</span> Membrane Potential Oscilloscope (V(t))</h3>
+              <span class="panel-tag" id="tagSelectedNeuron">Hidden #0</span>
+            </div>
+            <div class="canvas-wrapper">
+              <canvas id="canvasOscilloscope"></canvas>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: Interactive Pattern Drawing Studio -->
+    <!-- ========================================== -->
+    <section class="tab-pane" id="pane-draw">
+      <div class="draw-studio-grid">
+
+        <!-- Drawing Pad & Presets -->
+        <aside class="card-panel draw-canvas-container">
+          <div class="panel-header" style="width: 100%;">
+            <h2 class="panel-title"><span>✏️</span> 8×8 Pixel Drawing Pad</h2>
+            <span class="panel-tag">Touch / Mouse</span>
+          </div>
+
+          <div class="draw-canvas-box">
+            <canvas id="canvasDrawPad"></canvas>
+          </div>
+
+          <div class="btn-row" style="width: 100%;">
+            <button class="btn btn-secondary" id="btnDrawClear">Clear Pad</button>
+            <button class="btn btn-primary" id="btnTrainDigits">Train Digits</button>
+          </div>
+
+          <div style="width: 100%; margin-top: 1rem;">
+            <div class="control-label" style="margin-bottom: 0.4rem;">Preset Archetypes:</div>
+            <div class="preset-pills">
+              <button class="pill-btn" data-digit="0">Digit 0</button>
+              <button class="pill-btn" data-digit="1">Digit 1</button>
+              <button class="pill-btn" data-digit="2">Digit 2</button>
+              <button class="pill-btn" data-digit="3">Digit 3</button>
+              <button class="pill-btn" data-digit="4">Digit 4</button>
+            </div>
+          </div>
+
+          <div class="callout-info" style="width: 100%;">
+            ✏️ Draw freely with mouse or touch. The input pixels are rate-encoded into Poisson spike trains and propagated through a <strong>64 &rarr; 32 &rarr; 5</strong> LIF network in real-time.
+          </div>
+        </aside>
+
+        <!-- Recognition & Output Spike Stream -->
+        <section class="card-panel">
+          <div class="panel-header">
+            <h3 class="panel-title"><span>⚡</span> Spiking Predictions & Firing Rates</h3>
+            <span class="panel-tag" id="digitPredictedBadge" style="color: #00f2fe; font-weight: 700; font-size: 0.9rem;">Prediction: -</span>
+          </div>
+
+          <!-- Prediction Output Bars -->
+          <div class="pred-bars-container" id="digitPredBars">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Drawing Studio Spike Raster -->
+          <div style="margin-top: 1.5rem;">
+            <div class="panel-header">
+              <h4 class="panel-title" style="font-size: 0.9rem;"><span>📊</span> Digit Processing Spike Raster</h4>
+              <span class="panel-tag">64 Input + 32 Hidden + 5 Output</span>
+            </div>
+            <div class="canvas-wrapper" style="height: 220px;">
+              <canvas id="canvasDrawRaster"></canvas>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: Izhikevich Biological Dynamics -->
+    <!-- ========================================== -->
+    <section class="tab-pane" id="pane-izhi">
+      <div class="izhi-grid">
+
+        <!-- Presets and Parameters -->
+        <aside class="card-panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><span>🧠</span> Cortical Firing Presets</h2>
+            <span class="panel-tag">2D Dynamical System</span>
+          </div>
+
+          <div class="preset-card-list" id="izhiPresetList">
+            <!-- Dynamically populated presets -->
+          </div>
+
+          <!-- Interactive Izhikevich Parameters -->
+          <div class="control-group">
+            <div class="control-label-row">
+              <span class="control-label">Recovery Timescale (a)</span>
+              <span class="control-val" id="valIzhiA">0.02</span>
+            </div>
+            <input type="range" id="paramIzhiA" min="0.01" max="0.15" step="0.01" value="0.02">
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span class="control-label">Recovery Sensitivity (b)</span>
+              <span class="control-val" id="valIzhiB">0.20</span>
+            </div>
+            <input type="range" id="paramIzhiB" min="0.1" max="0.35" step="0.01" value="0.20">
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span class="control-label">Reset Voltage c (mV)</span>
+              <span class="control-val" id="valIzhiC">-65mV</span>
+            </div>
+            <input type="range" id="paramIzhiC" min="-75" max="-45" step="1" value="-65">
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span class="control-label">Reset Recovery d</span>
+              <span class="control-val" id="valIzhiD">8.0</span>
+            </div>
+            <input type="range" id="paramIzhiD" min="0" max="10" step="0.5" value="8.0">
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span class="control-label">Injected Current I(t)</span>
+              <span class="control-val" id="valIzhiCurrent">10.0</span>
+            </div>
+            <input type="range" id="paramIzhiCurrent" min="0" max="25" step="0.5" value="10.0">
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-secondary" id="btnIzhiReset">Reset Trajectory</button>
+          </div>
+        </aside>
+
+        <!-- Real-time Oscilloscope & Phase Plane Portrait -->
+        <section class="izhi-canvases">
+          
+          <!-- Oscilloscope Trace -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h3 class="panel-title"><span>📈</span> Membrane Potential Trace v(t)</h3>
+              <span class="panel-tag" id="izhiActiveName">Regular Spiking</span>
+            </div>
+            <div class="izhi-canvas-wrapper">
+              <canvas id="canvasIzhiTrace"></canvas>
+            </div>
+            <div class="callout-info" style="margin-top: 0.75rem;">
+              Spike resets occur at <code>v &ge; +30 mV</code>, updating <code>v &larr; c</code> and <code>u &larr; u + d</code>.
+            </div>
+          </div>
+
+          <!-- Phase Plane Portrait -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h3 class="panel-title"><span>🌀</span> Phase Portrait (v vs u)</h3>
+              <span class="panel-tag">Nullclines & Limit Cycle</span>
+            </div>
+            <div class="izhi-canvas-wrapper">
+              <canvas id="canvasIzhiPhase"></canvas>
+            </div>
+            <div class="callout-info" style="margin-top: 0.75rem;">
+              <span style="color: #eab308; font-weight: 600;">Yellow:</span> v-nullcline <code>u = 0.04v&sup2; + 5v + 140 + I</code>.<br>
+              <span style="color: #ec4899; font-weight: 600;">Magenta:</span> u-nullcline <code>u = bv</code>.
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: SNN vs ANN Live Benchmark -->
+    <!-- ========================================== -->
+    <section class="tab-pane" id="pane-compare">
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- Benchmark Header & Controls -->
+        <div class="card-panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><span>⚡ vs 🤖</span> Live SNN vs ANN Side-by-Side Benchmark</h2>
+            <span class="panel-tag">LIF Spikes vs Float32 ReLU</span>
+          </div>
+
+          <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <div style="min-width: 200px;">
+              <select id="compareDatasetSelect">
+                <option value="circles" selected>Task: Concentric Circles</option>
+                <option value="xor">Task: Non-Linear XOR</option>
+                <option value="moons">Task: Two Moons</option>
+                <option value="spirals">Task: Two Spirals</option>
+              </select>
+            </div>
+
+            <button class="btn btn-primary" id="btnTrainCompareToggle">
+              <span id="compareTrainIcon">▶</span> <span id="compareTrainText">Train Both Simultaneously</span>
+            </button>
+            <button class="btn btn-secondary" id="btnStepCompare">Step 1 Epoch</button>
+            <button class="btn btn-danger" id="btnResetCompare">Reset Both</button>
+          </div>
+        </div>
+
+        <!-- Dual Side-by-Side Decision Boundary Canvases -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+          
+          <!-- SNN Canvas -->
+          <div class="card-panel" style="border-color: rgba(0, 242, 254, 0.3);">
+            <div class="panel-header">
+              <h3 class="panel-title" style="color: #00f2fe;"><span>⚡</span> Spiking Neural Network (SNN)</h3>
+              <span class="panel-tag" id="tagCompareSnnAcc">Accuracy: 0.0%</span>
+            </div>
+            <div class="canvas-wrapper" style="height: 320px;">
+              <canvas id="canvasCompareSNN"></canvas>
+            </div>
+            <div style="margin-top: 0.75rem; font-size: 0.78rem; color: var(--text-muted);">
+              <strong>Spike Rate-Coded Boundary:</strong> Output class determined by which LIF neuron fires more discrete action potentials across $T=16$ time steps.
+            </div>
+          </div>
+
+          <!-- ANN Canvas -->
+          <div class="card-panel" style="border-color: rgba(245, 158, 11, 0.3);">
+            <div class="panel-header">
+              <h3 class="panel-title" style="color: #f59e0b;"><span>🤖</span> Standard ANN (ReLU MLP)</h3>
+              <span class="panel-tag" id="tagCompareAnnAcc">Accuracy: 0.0%</span>
+            </div>
+            <div class="canvas-wrapper" style="height: 320px;">
+              <canvas id="canvasCompareANN"></canvas>
+            </div>
+            <div style="margin-top: 0.75rem; font-size: 0.78rem; color: var(--text-muted);">
+              <strong>Continuous Activation Boundary:</strong> Output class determined by standard continuous float logits $y = \text{Softmax}(W_2 \text{ReLU}(W_1 x + b_1) + b_2)$.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Side-by-Side Hardware & Compute Metric Table -->
+        <div class="card-panel">
+          <div class="panel-header">
+            <h3 class="panel-title"><span>📊</span> Hardware, Energy & Computational Comparison</h3>
+            <span class="panel-tag">Neuromorphic vs GPU Profile</span>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left;">
+              <thead>
+                <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted);">
+                  <th style="padding: 0.75rem;">Metric</th>
+                  <th style="padding: 0.75rem; color: #00f2fe;">⚡ Spiking Neural Network (SNN)</th>
+                  <th style="padding: 0.75rem; color: #f59e0b;">🤖 Standard ANN (ReLU MLP)</th>
+                  <th style="padding: 0.75rem; color: #10b981;">Architectural Advantage</th>
+                </tr>
+              </thead>
+              <tbody style="color: var(--text-main);">
+                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                  <td style="padding: 0.75rem; font-weight: 600;">Data Representation</td>
+                  <td style="padding: 0.75rem; font-family: var(--font-mono);">1-Bit Binary Spikes {0, 1}</td>
+                  <td style="padding: 0.75rem; font-family: var(--font-mono);">32-Bit Floating Point (Float32)</td>
+                  <td style="padding: 0.75rem; color: #10b981;">32× smaller data footprint</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                  <td style="padding: 0.75rem; font-weight: 600;">Core Hardware Operation</td>
+                  <td style="padding: 0.75rem; font-family: var(--font-mono); color: #00f2fe;">Sparse Additions (Accumulate only)</td>
+                  <td style="padding: 0.75rem; font-family: var(--font-mono); color: #f59e0b;">Multiply-Accumulate (MAC / FLOPs)</td>
+                  <td style="padding: 0.75rem; color: #10b981;">Zero floating-point multipliers</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                  <td style="padding: 0.75rem; font-weight: 600;">Temporal Dynamics</td>
+                  <td style="padding: 0.75rem; font-family: var(--font-mono);" id="cmpMetricSnnSteps">T = 16 time steps</td>
+                  <td style="padding: 0.75rem; font-family: var(--font-mono);">1 instantaneous step (T = 1)</td>
+                  <td style="padding: 0.75rem;">Native temporal & event processing</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                  <td style="padding: 0.75rem; font-weight: 600;">Operations per Inference</td>
+                  <td style="padding: 0.75rem; font-family: var(--font-mono); color: #00f2fe;" id="cmpMetricSops">~280 SOPs (Additions)</td>
+                  <td style="padding: 0.75rem; font-family: var(--font-mono); color: #f59e0b;" id="cmpMetricFlops">1,024 FLOPs (Multiplications)</td>
+                  <td style="padding: 0.75rem; color: #10b981;">Silent neurons consume 0 ops</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                  <td style="padding: 0.75rem; font-weight: 600;">Dynamic Energy Consumption</td>
+                  <td style="padding: 0.75rem; font-family: var(--font-mono); color: #00f2fe;" id="cmpMetricSnnEnergy">~0.25 pJ / inference</td>
+                  <td style="padding: 0.75rem; font-family: var(--font-mono); color: #f59e0b;" id="cmpMetricAnnEnergy">~4.60 pJ / inference</td>
+                  <td style="padding: 0.75rem; color: #10b981; font-weight: 700;" id="cmpMetricEnergyRatio">~18.4× Lower Energy!</td>
+                </tr>
+                <tr>
+                  <td style="padding: 0.75rem; font-weight: 600;">Current Loss / Accuracy</td>
+                  <td style="padding: 0.75rem; font-family: var(--font-mono); color: #00f2fe;" id="cmpMetricSnnLoss">Loss: 0.69 | Acc: 0.0%</td>
+                  <td style="padding: 0.75rem; font-family: var(--font-mono); color: #f59e0b;" id="cmpMetricAnnLoss">Loss: 0.69 | Acc: 0.0%</td>
+                  <td style="padding: 0.75rem;" id="cmpMetricWinning">Comparable accuracy</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    NeuroSpark SNN Simulator &copy; 2026 &bull; Advanced Neuromorphic Computing &amp; Biological Spike Dynamics Studio
+  </footer>
+
+  <!-- App Script Entrypoint -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
