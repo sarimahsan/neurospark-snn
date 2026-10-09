@@ -148,6 +148,14 @@ neurosimulator/
 
 ---
 
+## 👨‍💻 Author & Credits
+
+Developed with ❤️ by **[Sarim Ahsan](https://github.com/sarimahsan)**.
+
+Feel free to star ⭐ the repository if you found this project insightful!
+
+---
+
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE) — free for academic, personal, and commercial open-source use.
