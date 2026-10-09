@@ -11,14 +11,15 @@ An interactive, zero-dependency browser-based **Spiking Neural Network (SNN)** s
 
 ## 🎬 Video Demonstration
 
+https://github.com/sarimahsan/neurospark-snn/raw/main/assets/demo.mp4
+
+<video src="https://github.com/sarimahsan/neurospark-snn/raw/main/assets/demo.mp4" width="100%" controls loop muted playsinline></video>
+
 <div align="center">
-
-https://github.com/neurospark-snn/assets/demo.mp4
-
-[![Watch Demo Video](https://img.shields.io/badge/▶_Watch_Full_Demo_Video-assets%2Fdemo.mp4-00f2fe?style=for-the-badge)](https://github.com/sarimahsan/neurospark-snn/raw/main/assets/demo.mp4)
-
-<p><em>Interactive Walkthrough: SNN Classification Lab, Pattern Drawing Studio, Biological Playground & SNN vs ANN Benchmark</em></p>
-
+  <p><em>Interactive Walkthrough: SNN Classification Lab, Pattern Drawing Studio, Biological Playground & SNN vs ANN Benchmark</em></p>
+  <a href="https://github.com/sarimahsan/neurospark-snn/raw/main/assets/demo.mp4">
+    <img src="https://img.shields.io/badge/▶_Direct_Video_Link-demo.mp4-00f2fe?style=for-the-badge" alt="Direct Video Link">
+  </a>
 </div>
 
 ---
